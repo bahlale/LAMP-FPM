@@ -2,7 +2,7 @@
 install_apache(){
 echo -e "\n======\t Installing Apache and Modules \t======" 
   apt-get --purge -y remove libapache2-mod-php5
-  apt-get install -y apache2 libapache2-mod-fastcgi
+  apt-get install -y apache2 apache2.2-common libapache2-mod-fastcgi
   a2enmod rewrite actions fastcgi alias ssl
   service apache2 restart
 }
@@ -25,13 +25,23 @@ user_add(){
 }
 
 create_config(){
-  wget -O --no-check-certificate /tmp/vhost_$domain_name \
-  https://raw.githubusercontent.com/bahlale/LAMP-FPM/dev/conf/apache_vhost_template
-  sed -i 's\DOMAIN_NAME\$domain_name\g' /tmp/vhost_$domain_name
-  sed -i 's\FTP_USER\$ftp_user\g'
-
+  echo -e "\n======\t Creating Configuration Files \t======"
+  wget -O --no-check-certificate /etc/apache2/sites-available/$domain_name.conf \
+    https://raw.githubusercontent.com/bahlale/LAMP-FPM/dev/conf/apache_vhost_template
+  sed -i 's\DOMAIN_NAME\$domain_name\g' /etc/apache2/sites-available/$domain_name.conf
+  sed -i 's\FTP_USER\$ftp_user\g' /etc/apache2/sites-available/$domain_name.conf
+  a2ensite $domain_name
+  wget -O --no-check-certificate /etc/apache2/conf.d/php-fpm.conf \
+    https://raw.githubusercontent.com/bahlale/LAMP-FPM/dev/conf/apache_php_fpm_template
+  rm -rf /etc/php5/fpm/pool.d/www.conf
+  wget -O --no-check-certificate /etc/apache2/conf.d/php-fpm.conf \
+    https://raw.githubusercontent.com/bahlale/LAMP-FPM/dev/conf/php_fpm_pool_template
+  sed -i 's\FTP_USER\$ftp_user\g' /etc/apache2/conf.d/php-fpm.conf
+    
 }
 
 
 install_apache;
 install_php;
+user_add;
+create_config;
