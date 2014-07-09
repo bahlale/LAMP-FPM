@@ -18,12 +18,11 @@ echo -e "\n======\t Installing PHP and Modules \t======"
 user_add(){
   mkdir -p /var/www/vhosts/$domain_name/httpdocs
   mkdir /var/www/vhosts/$domain_name/logs
-  vhost=$(/var/www/vhosts/$domain_name)
   touch /var/www/vhosts/$domain_name/logs/error.log
   touch /var/www/vhosts/$domain_name/logs/access.log
-  chown $ftp_user:$ftp_user/var/www/vhosts/$domain_name/ -R
+  chown $ftp_user:$ftp_user /var/www/vhosts/$domain_name/ -R
   echo -e "\n======\t Creating User \t======"
-  sudo useradd -d $vhost $ftp_user
+  sudo useradd -d /var/www/vhosts/$domain_name $ftp_user
   echo -e "$pass\n$pass\n" | sudo passwd $ftp_user
 }
 
