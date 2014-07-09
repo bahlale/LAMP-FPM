@@ -1,0 +1,19 @@
+<VirtualHost *:80>
+  ServerName DOMAIN_NAME
+  ServerAlias www.DOMAIN_NAME
+   
+  DocumentRoot /var/www/vhosts/DOMAIN_NAME/httpdocs
+  <Directory /var/www/vhosts/DOMAIN_NAME/httpdocs>
+    Options Indexes FollowSymLinks MultiViews
+    AllowOverride All
+    Order allow,deny
+    Allow from all
+  </Directory>
+ 
+  Alias /fcgi-bin/php5-fpm /fcgi-bin-php5-fpm-FTP_USER
+  FastCgiExternalServer /fcgi-bin-php5-fpm-FTP_USER -socket /var/run/php5-fpm-FTP_USER.sock -pass-header Authorization
+ 
+  ErrorLog /var/www/vhosts/DOMAIN_NAME/logs/error.log
+  LogLevel warn
+  CustomLog /var/www/vhosts/DOMAIN_NAME/logs/access.log combined
+</VirtualHost> 
