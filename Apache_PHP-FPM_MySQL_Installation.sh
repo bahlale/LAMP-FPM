@@ -31,7 +31,7 @@ create_config(){
   echo -e "\n======\t Creating Configuration Files \t======"
   wget --no-check-certificate -O /etc/apache2/sites-available/$domain_name \
     https://raw.githubusercontent.com/bahlale/LAMP-FPM/dev/conf/apache_vhost_template
-  sed -i "s@DOMAIN_NAME@$domain_name@g" /etc/apache2/sites-available/$domain_name.conf
+  sed -i "s@DOMAIN_NAME@$domain_name@g" /etc/apache2/sites-available/$domain_name
   sed -i "s@FTP_USER@$ftp_user@g" /etc/apache2/sites-available/$domain_name
   a2ensite $domain_name
   wget --no-check-certificate -O /etc/apache2/conf.d/php-fpm.conf \
