@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+domain_name=$1
+ftp_user=$2
+pass=$3
 install_apache(){
 echo -e "\n======\t Installing Apache and Modules \t======" 
   apt-get --purge -y remove libapache2-mod-php5
@@ -37,7 +40,8 @@ create_config(){
   wget -O --no-check-certificate /etc/apache2/conf.d/php-fpm.conf \
     https://raw.githubusercontent.com/bahlale/LAMP-FPM/dev/conf/php_fpm_pool_template
   sed -i 's\FTP_USER\$ftp_user\g' /etc/apache2/conf.d/php-fpm.conf
-    
+  service php5-fpm restart
+  service apache2 restart  
 }
 
 
