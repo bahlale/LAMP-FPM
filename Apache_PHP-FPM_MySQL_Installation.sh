@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 install_apache(){
-echo -e "\n======\t Installing Apache and Modules \t======"	
-# apt-get --purge -y remove libapache2-mod-php5
-# apt-get install -y apache2 libapache2-mod-fastcgi
-# a2enmod rewrite actions fastcgi alias ssl
-# service apache2 restart
+echo -e "\n======\t Installing Apache and Modules \t======" 
+  apt-get --purge -y remove libapache2-mod-php5
+  apt-get install -y apache2 libapache2-mod-fastcgi
+  a2enmod rewrite actions fastcgi alias ssl
+  service apache2 restart
 }
 
 install_php(){
 echo -e "\n======\t Installing PHP and Modules \t======"
-# apt-get install -y php5 php5-mysql php5-fpm php5-curl php5-gd php5-imagick php-apc 
+  apt-get install -y php5 php5-mysql php5-fpm php5-curl php5-gd php5-imagick php-apc 
 }
 
 user_add(){
@@ -25,7 +25,11 @@ user_add(){
 }
 
 create_config(){
-	wget -O /tmp/vhost_domainname 
+  wget -O --no-check-certificate /tmp/vhost_$domain_name \
+  https://raw.githubusercontent.com/bahlale/LAMP-FPM/dev/conf/apache_vhost_template
+  sed -i 's\DOMAIN_NAME\$domain_name\g' /tmp/vhost_$domain_name
+  sed -i 's\FTP_USER\$ftp_user\g'
+
 }
 
 
