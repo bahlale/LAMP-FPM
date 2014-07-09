@@ -5,6 +5,7 @@ pass=$3
 install_apache(){
 echo -e "\n======\t Installing Apache and Modules \t======" 
   apt-get --purge -y remove libapache2-mod-php5
+  apt-get -y update; apt-get -y upgrade;
   apt-get install -y apache2 apache2.2-common libapache2-mod-fastcgi
   a2enmod rewrite actions fastcgi alias ssl
   service apache2 restart
@@ -20,7 +21,7 @@ user_add(){
   mkdir /var/www/vhosts/$domain_name/logs
   touch /var/www/vhosts/$domain_name/logs/error.log
   touch /var/www/vhosts/$domain_name/logs/access.log
-  chown $ftp_user:$ftp_user /var/www/vhosts/$domain_name/ -R
+  chown $ftp_user.$ftp_user /var/www/vhosts/$domain_name/ -R
   echo -e "\n======\t Creating User \t======"
   sudo useradd -d /var/www/vhosts/$domain_name $ftp_user
   echo -e "$pass\n$pass\n" | sudo passwd $ftp_user
@@ -36,9 +37,9 @@ create_config(){
   wget --no-check-certificate -O /etc/apache2/conf.d/php-fpm.conf \
     https://raw.githubusercontent.com/bahlale/LAMP-FPM/dev/conf/apache_php_fpm_template
   rm -rf /etc/php5/fpm/pool.d/www.conf
-  wget --no-check-certificate  -O /etc/apache2/conf.d/php-fpm.conf \
+  wget --no-check-certificate  -O /etc/php5/fpm/pool.d/$ftp_user.conf \
     https://raw.githubusercontent.com/bahlale/LAMP-FPM/dev/conf/php_fpm_pool_template
-  sed -i "s@FTP_USER@$ftp_user@g" /etc/apache2/conf.d/php-fpm.conf
+  sed -i "s@FTP_USER@$ftp_user@g" /etc/apache2/conf.d/$ftp_user.conf
   service php5-fpm restart
   service apache2 restart  
 }
