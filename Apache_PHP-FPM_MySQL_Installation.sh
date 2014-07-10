@@ -8,18 +8,19 @@ install_apache(){
   ubuntu_ver=$(cat /etc/issue | awk '{print $2}')
   if [ $ubuntu_ver = "14.04" ];then
     apt-get install -y apache2 libapache2-mod-fastcgi
+    a2enmod rewrite actions fastcgi alias ssl
+    a2dissite 000-default
     install_php;
     user_add;
     create_config_apache24;
   else
     apt-get install -y apache2 apache2.2-common libapache2-mod-fastcgi
+    a2enmod rewrite actions fastcgi alias ssl
+    a2dissite default
     install_php;
     user_add;
     create_config_apache22;
   fi
-  a2enmod rewrite actions fastcgi alias ssl
-  a2dissite default
-  service apache2 restart
 }
 
 install_php(){
@@ -62,13 +63,14 @@ create_config_apache22(){
 
 create_config_apache24(){
   echo -e "\n======\t Creating Configuration Files \t======"
-  wget -q --no-check-certificate -O /etc/apache2/sites-available/$domain_name \
+  wget -q --no-check-certificate -O /etc/apache2/sites-available/$domain_name.conf \
     https://raw.githubusercontent.com/bahlale/LAMP-FPM/dev/conf/apache24_vhost_template
-  sed -i "s@DOMAIN_NAME@$domain_name@g" /etc/apache2/sites-available/$domain_name
-  sed -i "s@FTP_USER@$ftp_user@g" /etc/apache2/sites-available/$domain_name
+  sed -i "s@DOMAIN_NAME@$domain_name@g" /etc/apache2/sites-available/$domain_name.conf
+  sed -i "s@FTP_USER@$ftp_user@g" /etc/apache2/sites-available/$domain_name.conf
   a2ensite $domain_name
-  wget -q --no-check-certificate -O /etc/apache2/conf.d/php-fpm.conf \
+  wget -q --no-check-certificate -O /etc/apache2/conf-available/php-fpm.conf \
     https://raw.githubusercontent.com/bahlale/LAMP-FPM/dev/conf/apache24_php_fpm_template
+  a2enconf php-fpm.conf  
   rm -rf /etc/php5/fpm/pool.d/www.conf
   wget -q --no-check-certificate  -O /etc/php5/fpm/pool.d/$ftp_user.conf \
     https://raw.githubusercontent.com/bahlale/LAMP-FPM/dev/conf/php_fpm_pool_template
