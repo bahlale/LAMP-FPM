@@ -51,7 +51,9 @@ domain_template(){
   echo "<?php phpinfo();" > /var/www/vhosts/$domain_name/httpdocs/info.php
   chown -cR $ftp_user.$ftp_user /var/www/vhosts/$domain_name
   clear;
-  echo -e "Check PHP Status through --> http://$domain_name/info.php"
+  echo -e "\n\n"
+  echo -e "\t\tCheck PHP Status through --> http://$domain_name/info.php"
+  echo -e "\n\n"
 }
 
 check_debian(){
