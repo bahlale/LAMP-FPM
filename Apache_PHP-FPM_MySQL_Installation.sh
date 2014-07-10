@@ -23,7 +23,6 @@ user_add(){
   mkdir /var/www/vhosts/$domain_name/logs
   touch /var/www/vhosts/$domain_name/logs/error.log
   touch /var/www/vhosts/$domain_name/logs/access.log
-  chown $ftp_user.$ftp_user /var/www/vhosts/$domain_name/ -R
   echo -e "\n======\t Creating User \t======"
   useradd -d /var/www/vhosts/$domain_name $ftp_user
   echo -e "$pass\n$pass\n" | passwd $ftp_user
@@ -44,6 +43,15 @@ create_config(){
   sed -i "s@FTP_USER@$ftp_user@g" /etc/php5/fpm/pool.d/$ftp_user.conf
   service php5-fpm restart
   service apache2 restart  
+  domain_template;
+}
+
+domain_template(){
+  echo "Index page of $domain_name" > /var/www/vhosts/$domain_name/httpdocs/index.html
+  echo "<?php phpinfo();" > /var/www/vhosts/$domain_name/httpdocs/info.php
+  chown -cR $ftp_user.$ftp_user /var/www/vhosts/$domain_name
+  clear;
+  echo -e "Check PHP Status through --> http://$domain_name/info.php"
 }
 
 check_debian(){
