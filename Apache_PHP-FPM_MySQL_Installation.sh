@@ -4,17 +4,18 @@ ftp_user=$2
 pass=$3
 
 install_apache(){
-echo -e "\n======\t Installing Apache and Modules \t======" 
   apt-get -y update; apt-get -y upgrade;
   ubuntu_ver=$(cat /etc/issue | awk '{print $2}')
   if [ $ubuntu_ver = "14.04" ];then
     apt-get install -y apache2 libapache2-mod-fastcgi
+    install_php;
     user_add;
-    create_config_apach24;
+    create_config_apache24;
   else
     apt-get install -y apache2 apache2.2-common libapache2-mod-fastcgi
+    install_php;
     user_add;
-    create_config_apach22;
+    create_config_apache22;
   fi
   a2enmod rewrite actions fastcgi alias ssl
   a2dissite default
@@ -22,9 +23,13 @@ echo -e "\n======\t Installing Apache and Modules \t======"
 }
 
 install_php(){
-echo -e "\n======\t Installing PHP and Modules \t======"
-  apt-get --purge -y remove libapache2-mod-php5
-  apt-get install -y php5 php5-mysql php5-fpm php5-curl php5-gd php5-imagick php-apc 
+  if dpkg-query -W php5-fpm;then
+    echo "\n======\t  PHP-FPM Already installed \t======"
+  else
+    echo -e "\n======\t PHP-FPM not found installing PHP and Modules \t======"
+    apt-get --purge -y remove libapache2-mod-php5
+    apt-get install -y php5 php5-mysql php5-fpm php5-curl php5-gd php5-imagick php-apc 
+  fi   
 }
 
 user_add(){
@@ -37,7 +42,7 @@ user_add(){
   echo -e "$pass\n$pass\n" | passwd $ftp_user
 }
 
-create_config_apach22(){
+create_config_apache22(){
   echo -e "\n======\t Creating Configuration Files \t======"
   wget -q --no-check-certificate -O /etc/apache2/sites-available/$domain_name \
     https://raw.githubusercontent.com/bahlale/LAMP-FPM/dev/conf/apache_vhost_template
@@ -55,7 +60,7 @@ create_config_apach22(){
   domain_template;
 }
 
-create_config_apach24(){
+create_config_apache24(){
   echo -e "\n======\t Creating Configuration Files \t======"
   wget -q --no-check-certificate -O /etc/apache2/sites-available/$domain_name \
     https://raw.githubusercontent.com/bahlale/LAMP-FPM/dev/conf/apache24_vhost_template
@@ -99,14 +104,8 @@ check_debian(){
 
 check_debian;
 if dpkg-query -W libapache2-mod-fastcgi;then
-  echo "Apache Already installed"
+  echo "\n======\t Apache Already installed \t======"
 else
-  echo "Apache not found installing...."
+  echo -e "\n======\t Installing Apache and Modules \t======" 
   install_apache;
-fi
-if dpkg-query -W php5-fpm;then
-  echo "PHP-FPM Already installed"
-else
-  echo "PHP-FPM not found installing...."
-  install_php;
 fi
