@@ -9,6 +9,7 @@ echo -e "\n======\t Installing Apache and Modules \t======"
   apt-get -y update; apt-get -y upgrade;
   apt-get install -y apache2 apache2.2-common libapache2-mod-fastcgi
   a2enmod rewrite actions fastcgi alias ssl
+  a2dissite default
   service apache2 restart
 }
 
@@ -34,7 +35,6 @@ create_config(){
     https://raw.githubusercontent.com/bahlale/LAMP-FPM/dev/conf/apache_vhost_template
   sed -i "s@DOMAIN_NAME@$domain_name@g" /etc/apache2/sites-available/$domain_name
   sed -i "s@FTP_USER@$ftp_user@g" /etc/apache2/sites-available/$domain_name
-  a2dissite default
   a2ensite $domain_name
   wget --no-check-certificate -O /etc/apache2/conf.d/php-fpm.conf \
     https://raw.githubusercontent.com/bahlale/LAMP-FPM/dev/conf/apache_php_fpm_template
@@ -61,7 +61,18 @@ check_debian(){
 # }
 
 check_debian;
-install_apache;
-install_php;
+if dpkg-query -W libapache2-mod-fastcgi;then
+  echo "Apache Already installed"
+else
+  echo "Apache not found installing...."
+  install_apache;
+fi
+if dpkg-query -W php5-fpm;then
+  echo "PHP-FPM Already installed"
+else
+  echo "PHP-FPM not found installing...."
+  install_php;
+fi
+
 user_add;
 create_config;
