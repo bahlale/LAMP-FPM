@@ -1,0 +1,19 @@
+<FilesMatch ".+\.ph(p[345]?|t|tml)$">
+    SetHandler application/x-httpd-php
+</FilesMatch>
+
+<FilesMatch ".+\.phps$">
+    SetHandler application/x-httpd-php-source
+    Deny from all
+</FilesMatch>
+ 
+<FilesMatch "^\.ph(p[345]?|t|tml|ps)$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+ 
+Action application/x-httpd-php /fcgi-bin/php5-fpm virtual
+Alias /fcgi-bin/php5-fpm /fcgi-bin-php5-fpm
+<Location /fcgi-bin/php5-fpm>
+  Require all granted
+</Location>

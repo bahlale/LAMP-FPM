@@ -5,9 +5,17 @@ pass=$3
 
 install_apache(){
 echo -e "\n======\t Installing Apache and Modules \t======" 
-  apt-get --purge -y remove libapache2-mod-php5
   apt-get -y update; apt-get -y upgrade;
-  apt-get install -y apache2 apache2.2-common libapache2-mod-fastcgi
+  ubuntu_ver=$(cat /etc/issue | awk '{print $2}')
+  if [ $ubuntu_ver = "14.04" ];then
+    apt-get install -y apache2 libapache2-mod-fastcgi
+    user_add;
+    create_config_apach24;
+  else
+    apt-get install -y apache2 apache2.2-common libapache2-mod-fastcgi
+    user_add;
+    create_config_apach22;
+  fi
   a2enmod rewrite actions fastcgi alias ssl
   a2dissite default
   service apache2 restart
@@ -15,6 +23,7 @@ echo -e "\n======\t Installing Apache and Modules \t======"
 
 install_php(){
 echo -e "\n======\t Installing PHP and Modules \t======"
+  apt-get --purge -y remove libapache2-mod-php5
   apt-get install -y php5 php5-mysql php5-fpm php5-curl php5-gd php5-imagick php-apc 
 }
 
@@ -28,17 +37,35 @@ user_add(){
   echo -e "$pass\n$pass\n" | passwd $ftp_user
 }
 
-create_config(){
+create_config_apach22(){
   echo -e "\n======\t Creating Configuration Files \t======"
-  wget --no-check-certificate -O /etc/apache2/sites-available/$domain_name \
+  wget -q --no-check-certificate -O /etc/apache2/sites-available/$domain_name \
     https://raw.githubusercontent.com/bahlale/LAMP-FPM/dev/conf/apache_vhost_template
   sed -i "s@DOMAIN_NAME@$domain_name@g" /etc/apache2/sites-available/$domain_name
   sed -i "s@FTP_USER@$ftp_user@g" /etc/apache2/sites-available/$domain_name
   a2ensite $domain_name
-  wget --no-check-certificate -O /etc/apache2/conf.d/php-fpm.conf \
+  wget -q --no-check-certificate -O /etc/apache2/conf.d/php-fpm.conf \
     https://raw.githubusercontent.com/bahlale/LAMP-FPM/dev/conf/apache_php_fpm_template
   rm -rf /etc/php5/fpm/pool.d/www.conf
-  wget --no-check-certificate  -O /etc/php5/fpm/pool.d/$ftp_user.conf \
+  wget -q --no-check-certificate  -O /etc/php5/fpm/pool.d/$ftp_user.conf \
+    https://raw.githubusercontent.com/bahlale/LAMP-FPM/dev/conf/php_fpm_pool_template
+  sed -i "s@FTP_USER@$ftp_user@g" /etc/php5/fpm/pool.d/$ftp_user.conf
+  service php5-fpm restart
+  service apache2 restart  
+  domain_template;
+}
+
+create_config_apach24(){
+  echo -e "\n======\t Creating Configuration Files \t======"
+  wget -q --no-check-certificate -O /etc/apache2/sites-available/$domain_name \
+    https://raw.githubusercontent.com/bahlale/LAMP-FPM/dev/conf/apache24_vhost_template
+  sed -i "s@DOMAIN_NAME@$domain_name@g" /etc/apache2/sites-available/$domain_name
+  sed -i "s@FTP_USER@$ftp_user@g" /etc/apache2/sites-available/$domain_name
+  a2ensite $domain_name
+  wget -q --no-check-certificate -O /etc/apache2/conf.d/php-fpm.conf \
+    https://raw.githubusercontent.com/bahlale/LAMP-FPM/dev/conf/apache24_php_fpm_template
+  rm -rf /etc/php5/fpm/pool.d/www.conf
+  wget -q --no-check-certificate  -O /etc/php5/fpm/pool.d/$ftp_user.conf \
     https://raw.githubusercontent.com/bahlale/LAMP-FPM/dev/conf/php_fpm_pool_template
   sed -i "s@FTP_USER@$ftp_user@g" /etc/php5/fpm/pool.d/$ftp_user.conf
   service php5-fpm restart
@@ -83,6 +110,3 @@ else
   echo "PHP-FPM not found installing...."
   install_php;
 fi
-
-user_add;
-create_config;
