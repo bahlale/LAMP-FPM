@@ -90,6 +90,7 @@ create_config_apache24(){
 }
 
 domain_template(){
+  install_mysql;
   echo "Index page of $domain_name" > /var/www/vhosts/$domain_name/httpdocs/index.html
   echo "<?php phpinfo();" > /var/www/vhosts/$domain_name/httpdocs/info.php
   chown -cR $ftp_user.$ftp_user /var/www/vhosts/$domain_name
