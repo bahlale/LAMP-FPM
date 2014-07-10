@@ -2,6 +2,7 @@
 domain_name=$1
 ftp_user=$2
 pass=$3
+
 install_apache(){
 echo -e "\n======\t Installing Apache and Modules \t======" 
   apt-get --purge -y remove libapache2-mod-php5
@@ -23,8 +24,8 @@ user_add(){
   touch /var/www/vhosts/$domain_name/logs/access.log
   chown $ftp_user.$ftp_user /var/www/vhosts/$domain_name/ -R
   echo -e "\n======\t Creating User \t======"
-  sudo useradd -d /var/www/vhosts/$domain_name $ftp_user
-  echo -e "$pass\n$pass\n" | sudo passwd $ftp_user
+  useradd -d /var/www/vhosts/$domain_name $ftp_user
+  echo -e "$pass\n$pass\n" | passwd $ftp_user
 }
 
 create_config(){
@@ -33,6 +34,7 @@ create_config(){
     https://raw.githubusercontent.com/bahlale/LAMP-FPM/dev/conf/apache_vhost_template
   sed -i "s@DOMAIN_NAME@$domain_name@g" /etc/apache2/sites-available/$domain_name
   sed -i "s@FTP_USER@$ftp_user@g" /etc/apache2/sites-available/$domain_name
+  a2dissite default
   a2ensite $domain_name
   wget --no-check-certificate -O /etc/apache2/conf.d/php-fpm.conf \
     https://raw.githubusercontent.com/bahlale/LAMP-FPM/dev/conf/apache_php_fpm_template
@@ -44,7 +46,21 @@ create_config(){
   service apache2 restart  
 }
 
+check_debian(){
+  os=$(for f in $(find /etc -type f -maxdepth 1 \( ! -wholename /etc/os-release ! -wholename \
+   /etc/lsb-release -wholename /etc/\*release -o -wholename /etc/\*version \) 2> /dev/null); \
+   do echo ${f:5:${#f}-13}; done;)
+  if [ "$os" == "debian" ];then
+    cp -arp /etc/apt/sources.list /etc/apt/sources.list.ori
+    sed -i '/ftp/ s/$/ non-free/' /etc/apt/sources.list
+  fi
+}
 
+# install_mysql(){
+
+# }
+
+check_debian;
 install_apache;
 install_php;
 user_add;
