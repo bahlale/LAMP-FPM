@@ -2,6 +2,15 @@
 domain_name=$1
 ftp_user=$2
 pass=$3
+mysql_pass=$4
+
+if(( $(id -u) > 0 ));then
+   echo "This $0 script must be run as root" 1>&2
+   exit 1
+fi
+
+[ ! $# -eq 4 ] && \
+echo "Usage: $0 Domain_Name FTP_User_Name FTP_Password MySQL_Root_Password" && exit 1;
 
 install_apache(){
   apt-get -y update; apt-get -y upgrade;
@@ -100,9 +109,33 @@ check_debian(){
   fi
 }
 
-# install_mysql(){
-
-# }
+install_mysql(){
+  echo -e "\n======\t Installing Prcona MySQL \t======" 
+  apt-key adv --keyserver keys.gnupg.net --recv-keys 1C4CBDCDCD2EFD2A  
+  percona_os=( squeeze wheezy lucid precise saucy trusty )
+  for i in "${percona_os[@]}"
+  do
+    os_count=$(grep -c $i /etc/apt/sources.list)
+    if(( $os_count > 0 ));then
+      echo "found $i"
+      echo -e "\n## Percona Repo" > /etc/apt/sources.list.d/percona.list
+    echo "deb http://repo.percona.com/apt VERSION main" | sed "s/VERSION/$i/" \
+     >> /etc/apt/sources.list.d/percona.list
+    echo "deb-src http://repo.percona.com/apt VERSION main" | sed "s/VERSION/$i/" \
+     >> /etc/apt/sources.list.d/percona.list
+    fi
+  done
+  sh -c 'cat <<EOF >/etc/apt/preferences.d/00percona.pref
+  Package: *
+  Pin: release o=Percona Development Team
+  Pin-Priority: 1001
+  EOF' > /etc/apt/preferences.d/00percona.pref
+  apt-get -y update;
+  mysql_server_conf="percona-server-server-5.5 percona-server-server"
+  echo "${mysql_server_conf}/root_password password $mysql_pass" | sudo debconf-set-selections
+  echo "${mysql_server_conf}/root_password_again password $mysql_pass" | sudo debconf-set-selections
+  apt-get -y install percona-server-server-5.5 percona-server-client-5.5 
+}
 
 check_debian;
 if dpkg-query -W libapache2-mod-fastcgi;then
