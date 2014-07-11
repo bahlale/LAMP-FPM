@@ -132,10 +132,25 @@ install_mysql(){
   Pin-Priority: 1001
   EOF' > /etc/apt/preferences.d/00percona.pref
   apt-get -y update;
-  mysql_server_conf="percona-server-server-5.5 percona-server-server"
-  echo "${mysql_server_conf}/root_password password $mysql_pass" | sudo debconf-set-selections
-  echo "${mysql_server_conf}/root_password_again password $mysql_pass" | sudo debconf-set-selections
-  apt-get -y install percona-server-server-5.5 percona-server-client-5.5 
+  if dpkg-query -W percona-server-common-5.5;then
+    echo "\n======\t  MySQL Already installed \t======"
+  else
+    mysql_server_conf="percona-server-server-5.5 percona-server-server"
+    echo "${mysql_server_conf}/root_password password $mysql_pass" | debconf-set-selections
+    echo "${mysql_server_conf}/root_password_again password $mysql_pass" | debconf-set-selections
+    apt-get -y install percona-server-server-5.5 percona-server-client-5.5 
+    if dpkg-query -W phpmyadmin;then
+      echo "\n======\t  PHPMyAdmin Already installed \t======"
+    else
+      myadmin_conf="phpmyadmin phpmyadmin"
+      echo "$myadmin_conf/dbconfig-install boolean true" | debconf-set-selections
+      echo "$myadmin_conf/mysql/app-pass password $pass" | debconf-set-selections
+      echo "$myadmin_conf/app-password-confirm password $pass" | debconf-set-selections
+      echo "$myadmin_conf/mysql/admin-pass password $my_pass" | debconf-set-selections
+      echo "$myadmin_conf/reconfigure-webserver multiselect apache2" | debconf-set-selections
+      apt-get -y install phpmyadmin
+    fi  
+  fi  
 }
 
 check_debian;
