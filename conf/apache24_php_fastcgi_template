@@ -3,12 +3,12 @@
   FastCgiIpcDir /var/lib/apache2/fastcgi
 </IfModule>
 
-<Directory /usr/local/bin/php-fastcgi-wrapper>
+<Directory /usr/local/bin>
         Require all granted
 </Directory>
 
 <Ifmodule mod_fastcgi.c>
-        FastCgiExternalServe /usr/local/bin/php-fastcgi-wrapper -pass-header HTTP_AUTHORIZATION
+        FastCgiServer /usr/local/bin/php-fastcgi-wrapper -processes 10 -restart-delay 1 -init-start-delay 1 -pass-header HTTP_AUTHORIZATION
         Alias /binary /usr/local/bin
         <Location /binary/php-fastcgi-wrapper>
                 Options ExecCGI
