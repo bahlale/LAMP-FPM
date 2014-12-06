@@ -1,0 +1,15 @@
+<IfModule mod_suphp.c>
+  suPHP_AddHandler application/x-httpd-suphp
+
+  <FilesMatch "\.ph(p3?|tml)$">
+    SetHandler application/x-httpd-suphp
+  </FilesMatch>
+
+  <Directory />
+    suPHP_Engine on
+  </Directory>
+
+  <Directory /usr/share>
+    suPHP_Engine off
+  </Directory>
+</IfModule>
