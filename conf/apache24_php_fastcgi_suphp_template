@@ -1,0 +1,19 @@
+<VirtualHost *:80>
+  ServerName DOMAIN_NAME
+  ServerAlias www.DOMAIN_NAME
+  
+  <IfModule mod_suphp.c>
+    suPHP_UserGroup FTP_USER FTP_USER
+  </IfModule>
+
+  DocumentRoot /var/www/vhosts/DOMAIN_NAME/httpdocs
+  <Directory /var/www/vhosts/DOMAIN_NAME/httpdocs>
+    Options Indexes FollowSymLinks MultiViews
+    AllowOverride All
+    Require all granted
+  </Directory>
+
+  ErrorLog /var/www/vhosts/DOMAIN_NAME/logs/error.log
+  LogLevel warn
+  CustomLog /var/www/vhosts/DOMAIN_NAME/logs/access.log combined
+</VirtualHost> 
