@@ -1,0 +1,33 @@
+<FilesMatch ".+\.ph(p[345]?|t|tml)$">
+    SetHandler application/x-httpd-php
+</FilesMatch>
+
+<FilesMatch ".+\.phps$">
+    SetHandler application/x-httpd-php-source
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+<FilesMatch "^\.ph(p[345]?|t|tml|ps)$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+<Directory /usr/share>
+  <IfModule mod_php5.c>
+    <FilesMatch "\.ph(p3?|tml)$">
+      SetHandler application/x-httpd-php
+    </FilesMatch>
+ 
+    <FilesMatch "\.phps$">
+      SetHandler application/x-httpd-php-source
+    </FilesMatch>
+
+    <IfModule mod_userdir.c>
+      <Directory /home/*/public_html>
+        php_admin_value engine Off
+      </Directory>
+    </IfModule>
+
+  </IfModule>
+</Directory>
